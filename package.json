@@ -12,7 +12,7 @@
       "nodejs脚本",
       "自动下单"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "emailjs": "^3.8.0",
     "request": "^2.88.2",
