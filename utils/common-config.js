@@ -13,7 +13,7 @@ const {pick} = require('./util');
 const commonConfig = {
     data: {
         'api_version': '9.49.2',
-        'app_version': '2.82.0',
+        'app_version': '2.82.4',
         'app_client_id': '4',
         'channel': 'applet',
         'applet_source': '',
@@ -23,7 +23,7 @@ const commonConfig = {
     },
     hearder: {
         'ddmc-api-version': '9.49.2',
-        'ddmc-build-version': '2.82.0',
+        'ddmc-build-version': '2.82.4',
         'ddmc-app-client-id': '4',
         'ddmc-channel': 'applet',
         'ddmc-os-version': '[object Undefined]',

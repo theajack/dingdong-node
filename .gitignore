@@ -1,2 +1,3 @@
 _dev_scripts
 node_modules
+*.log

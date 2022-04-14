@@ -2,7 +2,7 @@
  * @Author: tackchen
  * @Date: 2022-04-12 21:33:50
  * @LastEditors: tackchen
- * @LastEditTime: 2022-04-14 07:29:42
+ * @LastEditTime: 2022-04-14 17:11:33
  * @FilePath: /dingdong-node/utils/logger.js
  * @Description: Coding something
  */
@@ -10,7 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const logPath = path.resolve('', '../_log/log.log');
+const logPath = path.resolve(__dirname, '../_log/log.log');
 
 const useLog = false;
 
