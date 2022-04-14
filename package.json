@@ -1,12 +1,17 @@
 {
   "name": "dingdong-node",
   "version": "1.0.0",
-  "description": "",
+  "description": "叮咚买菜nodejs自动下单脚本，支持邮件强通知和定时任务，支持捡漏和高峰模式",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node main.js"
   },
   "author": "",
+  "keywords": [
+      "叮咚买菜",
+      "nodejs脚本",
+      "自动下单"
+  ],
   "license": "ISC",
   "dependencies": {
     "emailjs": "^3.8.0",
