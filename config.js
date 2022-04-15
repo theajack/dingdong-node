@@ -21,4 +21,6 @@ module.exports = {
     // 抢菜策略，
     'run_mode': 'normal', // normal 为非高峰期策略，traffic 为高峰期策略
     'run_interval': 1000, // 每一个请求的轮询间隔
+
+    'useLogger': false, // 是否开启logger 调试使用
 };

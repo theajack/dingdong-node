@@ -2,13 +2,13 @@
  * @Author: tackchen
  * @Date: 2022-04-13 23:12:34
  * @LastEditors: tackchen
- * @LastEditTime: 2022-04-14 10:26:27
+ * @LastEditTime: 2022-04-15 08:53:43
  * @FilePath: /dingdong-node/utils/request.js
  * @Description: Coding something
  */
 const request = require('request');
 // const fs = require('fs');
-// const {logger} = require('./logger');
+const {logger} = require('./logger');
 const log = require('single-line-log').stdout;
 const {commonConfig} = require('./common-config');
 
@@ -42,7 +42,7 @@ const RequestMap = {
                 console.log('没有默认地址，请先添加地址');
                 return '';
             }
-            console.log('获取默认地址成功：' + defaultAddress.id);
+            console.log('获取默认地址成功：' + defaultAddress.location.address);
             orderEmialInfo.address = `收货地址：${defaultAddress.location.address}; \n收货人: ${defaultAddress.user_name}; \n收货电话: ${defaultAddress.mobile}`;
             return defaultAddress.id;
         }
@@ -190,6 +190,16 @@ function sendPostRequest ({
 }
 
 function handleRequestResult (name, error, response, resolve) {
+    const body = JSON.parse(response.body);
+    logger(`${name}: \n ${response.statusCode}; ${body.msg || body.message}`);
+    if (name === 'checkorder' || name === 'add') {
+        if (body.code === 0) {
+            logger(`${name}: \n ${body.message}`);
+        } else {
+            logger(`${name}: \n ${body.tips.limitMsg}`);
+        }
+        logger(`${name}: \n ${JSON.stringify(body)}`);
+    }
     if (error || response.statusCode !== 200) {
         // console.log(error, response.statusCode); // 请求成功的处理逻辑
         // fs.writeFileSync('./_log/error/response-' + name + '-error.json', JSON.stringify(response, null, 4), 'utf-8');
@@ -197,7 +207,7 @@ function handleRequestResult (name, error, response, resolve) {
     } else {
         // console.log(name + ' success');
         // fs.writeFileSync('./_log/response-' + name + '.json', JSON.stringify(JSON.parse(response.body), null, 4), 'utf-8');
-        resolve(JSON.parse(response.body));
+        resolve(body);
     }
 }
 
