@@ -6,13 +6,13 @@
  * @FilePath: /dingdong-node/main.js
  * @Description: Coding something
  */
-
-// const {logger} = require('./utils/logger');
 const {requestBase, RequestKeys} = require('./utils/request');
 const {createUUID, stringObject, pick, getDateStr} = require('./utils/util');
 const UserConfig = require('./config');
 const log = require('single-line-log').stdout;
 const {sendEmail, orderEmialInfo} = require('./utils/send-mail');
+const {exit} = require('process');
+const {maxTime} = require('./config');
 
 async function startTrafficMode () {
     const addressId = await getDefaultAddressId(); // 固定地址
@@ -84,7 +84,7 @@ async function startTrafficMode () {
                 }
             });
         }
-    }, UserConfig.run_interval);
+    }, UserConfig.runInterval);
 }
 
 async function startNormalMode () {
@@ -180,12 +180,17 @@ function getDefaultAddressId () {
     });
 }
 
-function main () {
+async function main () {
+
+    setTimeout(() => {
+        exit(0);
+    }, maxTime * 60 * 1000);
+
     if (typeof Object.values(UserConfig).find(v => v === '') !== 'undefined') {
         console.log('请先到config.js中完成所有配置');
         return;
     }
-    const mode = UserConfig.run_mode; // traffic
+    const mode = UserConfig.runMode; // traffic
     if (mode === 'normal') {
         startNormalMode();
     } else if (mode === 'traffic') {

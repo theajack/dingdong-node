@@ -13,7 +13,7 @@ const log = require('single-line-log').stdout;
 const {commonConfig} = require('./common-config');
 
 const {buildGetParam, buildPostData, getDateStr} = require('./util');
-const {run_interval} = require('../config');
+const {runInterval, useLogger} = require('../config');
 const {orderEmialInfo} = require('./send-mail');
 
 const RequestKeys = {
@@ -191,14 +191,20 @@ function sendPostRequest ({
 
 function handleRequestResult (name, error, response, resolve) {
     const body = JSON.parse(response.body);
-    logger(`${name}: \n ${response.statusCode}; ${body.msg || body.message}`);
-    if (name === 'checkorder' || name === 'add') {
-        if (body.code === 0) {
-            logger(`${name}: \n ${body.message}`);
-        } else {
-            logger(`${name}: \n ${body.tips.limitMsg}`);
+    if (useLogger) {
+        logger(`${name}: \n ${response.statusCode}; ${body.msg || body.message}`);
+        if (name === 'checkorder' || name === 'add') {
+            if (body.code === 0) {
+                logger(`${name}: \n ${body.message}`);
+            } else {
+                if (body.tips) {
+                    logger(`${name}: \n ${body.tips.limitMsg}`);
+                } else {
+                    logger(`${name}: \n ${body.message}`);
+                }
+            }
+            logger(`${name}: \n ${JSON.stringify(body)}`);
         }
-        logger(`${name}: \n ${JSON.stringify(body)}`);
     }
     if (error || response.statusCode !== 200) {
         // console.log(error, response.statusCode); // 请求成功的处理逻辑
@@ -244,7 +250,7 @@ function requestBase ({
                 index ++;
                 log(`重新请求：${name} 第${index}次`);
                 base(resolve);
-            }, run_interval);
+            }, runInterval);
         } else {
             resolve(null);
         }

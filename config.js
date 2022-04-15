@@ -19,8 +19,9 @@ module.exports = {
     'emailHost': 'smtp.qq.com', // 邮箱服务器地址 如非qq邮箱 请自行更改
 
     // 抢菜策略，
-    'run_mode': 'normal', // normal 为非高峰期策略，traffic 为高峰期策略
-    'run_interval': 1000, // 每一个请求的轮询间隔
+    'runMode': 'normal', // normal 为非高峰期策略，traffic 为高峰期策略
+    'runInterval': 1000, // 每一个请求的轮询间隔
+    'maxTime': 5, // 单次运行最长时间 防止被风控 单位为分钟
 
     'useLogger': false, // 是否开启logger 调试使用
 };
