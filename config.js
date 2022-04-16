@@ -10,6 +10,8 @@ const userConfig = {
     's_id': '',
     'openid': '',
     'device_token': '',
+    'api_version': '9.49.2', // 如果与抓包到的不一致，换成最新的
+    'app_version': '2.82.4', // 如果与抓包到的不一致，换成最新的
 
     // 以下为邮箱配置 非必需 如果要启动定时发送邮件提醒可以选一下 详情见readme.md
     'fromEmail': '', // 发送邮件的邮箱
