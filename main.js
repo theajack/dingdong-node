@@ -10,9 +10,31 @@ const {requestBase, RequestKeys} = require('./utils/request');
 const {createUUID, stringObject, pick, getDateStr} = require('./utils/util');
 const UserConfig = require('./config');
 const log = require('single-line-log').stdout;
+// const log = console.log;
 const {sendEmail, orderEmialInfo} = require('./utils/send-mail');
 const {exit} = require('process');
 const {maxTime} = require('./config');
+const {logger} = require('./utils/logger');
+
+const logControl = (() => {
+    const keys = Object.values(RequestKeys);
+    const logValues = keys.map(() => '');
+    const logIndex = keys.map(() => 0);
+
+    return {
+        log (name, value) {
+            if (UserConfig.runMode === 'normal') {
+                log(`${name}: ${value}`);
+            } else {
+                const index = keys.indexOf(name);
+                if (index === -1) return;
+                logIndex[index] ++;
+                logValues[index] = `${name}: ${value} (${logIndex[index]})`;
+                log(logValues.join('\n'));
+            }
+        }
+    };
+})();
 
 async function startTrafficMode () {
     const addressId = await getDefaultAddressId(); // 固定地址
@@ -22,22 +44,37 @@ async function startTrafficMode () {
         checkOrderMap = null;
 
     let index = 0;
+    let lastCheckAllStr = '';
     const interval = setInterval(() => {
         // [全选 - 获取购物车信息] - 获取配送信息(cart) - 确认订单(cart, times) - 提交订单(cart, times, check)
         requestBase({
             name: RequestKeys.SelectAll,
             loop: false,
-        }).then(async (success) => {
-            
-            log(`全选物品${success ? '成功' : '失败'}(${index++})`);
-            if (success) {
-                cartMap = await requestBase({
-                    name: RequestKeys.GetCart,
-                    loop: false,
-                });
-                log(`获取购物车${cartMap ? '成功' : '失败'}. (${index++})`);
+        }).then(async (products) => {
+            if (products) {
+                const ids = products.map(item => item.id).join('|');
+                const info = `已选${products.length}件商品, ${products.map(item => item.product_name).join(',')}`;
+                if (lastCheckAllStr !== ids) {
+                    lastCheckAllStr = ids;
+                    logControl.log(RequestKeys.SelectAll, `全选物品${products ? '成功' : '失败'}(${index++})`);
+                    cartMap = await requestBase({
+                        name: RequestKeys.GetCart,
+                        loop: false,
+                    });
+                    if (cartMap) {
+                        logControl.log(RequestKeys.GetCart, `获取购物车: 已选${products.length}件商品, ${info} (${index++})`);
+                        logger(`购物车有更新：${products.length}件商品, ${info}`);
+                    } else {
+                        lastCheckAllStr = '';
+                        logControl.log(RequestKeys.GetCart, '获取购物车信息失败');
+                    }
+                } else {
+                    logControl.log(RequestKeys.SelectAll, `全选物品成功，购物车信息未变化, ${info} (${index++})`);
+                }
             } else {
                 cartMap = null;
+                lastCheckAllStr = '';
+                logControl.log(RequestKeys.SelectAll, `全选物品失败(${index++})`);
             }
         });
 
@@ -51,7 +88,7 @@ async function startTrafficMode () {
                 loop: false,
             }).then((data) => {
                 multiReserveTimeMap = data;
-                log(`获取配送时间${data ? '成功' : '失败'}. (${index++})`);
+                logControl.log(RequestKeys.GetTimes, `获取配送时间${data ? '成功' : '失败'}. (${index++})`);
             });
         }
         if (cartMap && multiReserveTimeMap) {
@@ -66,10 +103,11 @@ async function startTrafficMode () {
                 loop: false,
             }).then(data => {
                 checkOrderMap = data;
-                log(`确认订单${data ? '成功' : '失败'}. (${index++})`);
+                logControl.log(RequestKeys.CheckOrder, `确认订单${data ? '成功' : '失败'}. (${index++})`);
             });
         }
         if (cartMap && multiReserveTimeMap && checkOrderMap) {
+            logControl.log(RequestKeys.AddOrder, '开始下单');
             requestBase(buildAddOrderArgs({
                 addressId,
                 cartMap,
@@ -80,7 +118,7 @@ async function startTrafficMode () {
                 if (data) {
                     clearInterval(interval);
                     onAddOrderSuccess();
-                    log(`下单${data ? '成功' : '失败'}. (${index++})`);
+                    logControl.log(RequestKeys.AddOrder, `下单${data ? '成功' : '失败'}. (${index++})`);
                 }
             });
         }
@@ -174,20 +212,24 @@ function buildAddOrderArgs ({
     };
 }
 
-function getDefaultAddressId () {
-    return requestBase({
+async function getDefaultAddressId () {
+    const addressId = await requestBase({
         name: RequestKeys.GetAddress,
     });
+
+    logControl.log(RequestKeys.GetAddress, `获取默认地址${addressId ? '成功: ' : '失败'}${addressId}`);
+
+    return addressId;
 }
-
 async function main () {
-
     setTimeout(() => {
+        logger(`运行定时结束`);
         exit(0);
     }, maxTime * 60 * 1000);
 
     if (typeof Object.values(UserConfig).find(v => v === '') !== 'undefined') {
         console.log('请先到config.js中完成所有配置');
+        exit(0);
         return;
     }
     const mode = UserConfig.runMode; // traffic
@@ -196,15 +238,21 @@ async function main () {
     } else if (mode === 'traffic') {
         startTrafficMode();
     }
+    logger(`开始运行，模式=${mode}； 时间=${maxTime}`);
 }
 
 function onAddOrderSuccess () {
+    logger(`下单成功`);
     if (UserConfig.emailCode) {
         sendEmail({
             title: `下单成功通知（${getDateStr()}）`,
             message: Object.values(orderEmialInfo).join(';\n')
         });
     }
+    setTimeout(() => {
+        logger(`下单成功结束运行`);
+        exit(0);
+    }, 4000);
 }
 
 main();

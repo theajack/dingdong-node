@@ -10,6 +10,7 @@
 const fs = require('fs');
 const path = require('path');
 const {useLogger} = require('../config');
+const {getDateStr} = require('./util');
 
 const logPath = path.resolve(__dirname, '../_log/log.log');
 
@@ -20,7 +21,7 @@ if (!fs.existsSync(logPath)) {
 const main = {
     logger (str) {
         if (useLogger) {
-            fs.appendFileSync(logPath, str + '\n\n');
+            fs.appendFileSync(logPath, `${getDateStr()}: ${str}\n`);
         }
     }
 };

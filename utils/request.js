@@ -10,18 +10,19 @@ const request = require('request');
 // const fs = require('fs');
 const {logger} = require('./logger');
 const log = require('single-line-log').stdout;
+// const log = console.log;
 const {commonConfig} = require('./common-config');
 
-const {buildGetParam, buildPostData, getDateStr} = require('./util');
+const {buildGetParam, buildPostData, getDateStr, parseJSON} = require('./util');
 const {runInterval, useLogger} = require('../config');
 const {orderEmialInfo} = require('./send-mail');
 
 const RequestKeys = {
     GetAddress: 'address',
+    SelectAll: 'all',
     GetCart: 'cart',
     GetTimes: 'times',
     CheckOrder: 'checkorder',
-    SelectAll: 'all',
     AddOrder: 'add',
 };
 
@@ -125,7 +126,7 @@ const RequestMap = {
                 const products = data.product.effective[0].products;
                 if (useLog) console.log(`成功选择了${products.length}件商品: ${products.map(item => item.product_name).join(',')}`);
                 orderEmialInfo.products = `商品列表:\n ${products.map(item => item.product_name).join(',\n')}`;
-                return true;
+                return products;
             }
             return false;
         }
@@ -189,8 +190,8 @@ function sendPostRequest ({
     });
 }
 
-function handleRequestResult (name, error, response, resolve) {
-    const body = JSON.parse(response.body);
+// eslint-disable-next-line no-unused-vars
+function handleLog (name, response, body) {
     if (useLogger) {
         logger(`${name}: \n ${response.statusCode}; ${body.msg || body.message}`);
         if (name === 'checkorder' || name === 'add') {
@@ -206,6 +207,15 @@ function handleRequestResult (name, error, response, resolve) {
             logger(`${name}: \n ${JSON.stringify(body)}`);
         }
     }
+}
+
+function handleRequestResult (name, error, response, resolve) {
+    
+    const body = parseJSON(response.body);
+    if (!body) {
+        console.log(response.body);
+    }
+    // handleLog(name, response, body);
     if (error || response.statusCode !== 200) {
         // console.log(error, response.statusCode); // 请求成功的处理逻辑
         // fs.writeFileSync('./_log/error/response-' + name + '-error.json', JSON.stringify(response, null, 4), 'utf-8');

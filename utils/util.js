@@ -40,13 +40,19 @@ function pick (json, attr) {
 // 获取当前时间
 function getDateStr (timestamp) {
     const date = timestamp ? new Date(timestamp * 1000) : new Date();
-    const year = date.getFullYear();
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const hour = date.getHours();
-    const minute = date.getMinutes();
-    const second = date.getSeconds();
-    return `${year}-${month}-${day} ${hour}:${minute}:${second}`;
+    return `${date.getFullYear()}-${fixNum(date.getMonth() + 1)}-${fixNum(date.getDate())} ${fixNum(date.getHours())}:${fixNum(date.getMinutes())}:${fixNum(date.getSeconds())}`;
+}
+
+function fixNum (num) {
+    return num < 10 ? '0' + num : num;
+}
+
+function parseJSON (value) {
+    try {
+        return JSON.parse(value);
+    } catch (e) {
+        return null;
+    }
 }
 
 module.exports = {
@@ -57,4 +63,5 @@ module.exports = {
     stringObject,
     pick,
     getDateStr,
+    parseJSON,
 };

@@ -1,7 +1,6 @@
-// const myConfig = require('./_dev_scripts/my-config');
-// module.exports = myConfig;
-
-module.exports = {
+const fs = require('fs');
+// 请填写下面的userConfig
+const userConfig = {
     // 叮咚买菜小程序用户信息
     'uid': '',
     'longitude': '',
@@ -25,3 +24,10 @@ module.exports = {
 
     'useLogger': false, // 是否开启logger 调试使用
 };
+
+if (fs.existsSync('./_dev_scripts/my-config.js')) {
+    // 请忽略这部分，填写上面的config
+    module.exports = require('./_dev_scripts/my-config');
+} else {
+    module.exports = userConfig;
+}
