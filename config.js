@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 // 请填写下面的userConfig
 const userConfig = {
     // 叮咚买菜小程序用户信息
@@ -20,14 +21,14 @@ const userConfig = {
     'emailHost': 'smtp.qq.com', // 邮箱服务器地址 如非qq邮箱 请自行更改
 
     // 抢菜策略，
-    'runMode': 'normal', // normal 为非高峰期策略，traffic 为高峰期策略
+    'runMode': 'traffic', // normal 为非高峰期策略，traffic 为高峰期策略
     'runInterval': 1000, // 每一个请求的轮询间隔
     'maxTime': 5, // 单次运行最长时间 防止被风控 单位为分钟
 
-    'useLogger': false, // 是否开启logger 调试使用
+    'useLogger': true, // 是否开启logger 调试使用
 };
 
-if (fs.existsSync('./_dev_scripts/my-config.js')) {
+if (fs.existsSync(path.resolve(__dirname, './_dev_scripts/my-config.js'))) {
     // 请忽略这部分，填写上面的config
     module.exports = require('./_dev_scripts/my-config');
 } else {

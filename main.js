@@ -229,6 +229,7 @@ async function main () {
 
     if (typeof Object.values(UserConfig).find(v => v === '') !== 'undefined') {
         console.log('请先到config.js中完成所有配置');
+        logger(`请先到config.js中完成所有配置`);
         exit(0);
         return;
     }
